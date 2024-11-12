@@ -1,0 +1,135 @@
+{
+    // Files
+    "files.exclude": {
+        "**/.DS_Store": true,
+        "**/.mypy_cache": true,
+        "**/.ipynb_checkpoints": true,
+        "**/__pycache__": true,
+        "**/build": true,
+        "**/gtest": true,
+        "**/.git": true,
+        "**/.vs": true,
+        "**/*.code-workspace": true,
+        "**/*.o": true,
+        "**/*.a": true,
+        "**/*.so": true,
+        "**/*.egg-info": true
+    },
+    "files.watcherExclude": {
+        "**/.DS_Store": true,
+        "**/.mypy_cache/**": true,
+        "**/.ipynb_checkpoints/**": true,
+        "**/__pycache__/**": true,
+        "**/build/**": true,
+        "**/gtest/**": true,
+        "**/.git/**": true,
+        "**/.vs/**": true,
+        "**/*.code-workspace": true,
+        "**/*.o": true,
+        "**/*.a": true,
+        "**/*.so": true,
+        "**/*.egg-info": true
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.autoSaveDelay": 10000,
+    "files.autoSave": "afterDelay",
+
+    // Editor
+    "editor.rulers": [200],
+    "editor.guides.bracketPairs": "active",
+    "editor.bracketPairColorization.enabled": true,
+    "editor.accessibilityPageSize": 100,
+    "editor.tabSize": 4,
+    "editor.inlayHints.enabled": "off",
+    "[cpp]": {
+        "editor.formatOnSave": true
+    },
+    "diffEditor.ignoreTrimWhitespace": false,
+
+    // Python
+    "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "standard",
+    "python.analysis.diagnosticMode": "workspace",
+    "notebook.diff.ignoreMetadata": true,
+    "notebook.diff.ignoreOutputs": true,
+    "notebook.showFoldingControls": "always",
+    "notebook.outline.showCodeCells": true,
+    "notebook.compactView": true,
+    "notebook.editorOptionsCustomizations": {
+        "editor.rulers": [200]
+    },
+    "notebook.output.textLineLimit": 20,
+    "jupyter.askForKernelRestart": false,
+    "jupyter.runStartupCommands": [
+        "%config IPCompleter.use_jedi = False"
+    ],
+    "jupyter.notebookFileRoot": "${workspaceFolder}",
+    "python.terminal.activateEnvironment": true,
+    "mypy-type-checker.args": [
+        "--ignore-missing-imports",
+        "--allow-redefinition",
+        "--strict",
+        "--allow-return-any"
+    ],
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.useLibraryCodeForTypes": true,
+
+    // C++
+    "cmake.configureOnOpen": true,
+    "cmake.configureOnEdit": true,
+    "cmake.parallelJobs": 16,
+    "cmake.defaultVariants": {
+        "buildType": {
+            "default": "release",
+            "description": "The build type.",
+            "choices": {
+                "release": {
+                    "short": "Release",
+                    "long": "Optimize for speed - exclude debug information.",
+                    "buildType": "Release"
+                }
+            }
+        }
+    },
+    "cmake.showOptionsMovedNotification": false,
+    "cmake.generator": "Unix Makefiles",
+    "clangd.arguments": [
+        "-background-index",
+        "--clang-tidy",
+        "--all-scopes-completion",
+        "--completion-style=detailed"
+    ],
+    "C_Cpp.codeAnalysis.updateDelay": 100,
+    "C_Cpp.intelliSenseUpdateDelay": 500,
+    "C_Cpp.intelliSenseEngine": "disabled",
+
+    // Terminal
+    "terminal.integrated.inheritEnv": true,
+    "terminal.integrated.sendKeybindingsToShell": true,
+    "terminal.integrated.scrollback": 10000,
+    "output.smartScroll.enabled": false,
+
+    // System
+    "window.commandCenter": false,
+    "workbench.sideBar.location": "right",
+    "remote.SSH.remotePlatform": {
+        "*": "linux"
+    },
+    "remote.SSH.connectTimeout": 60,
+    "telemetry.telemetryLevel": "off",
+    "terminal.integrated.enableMultiLinePasteWarning": false,
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "notebook.defaultFormatter": "ms-python.black-formatter",
+    "workbench.settings.applyToAllProfiles": [
+
+    ],
+    "launch": {
+
+        "configurations": [
+            {"env": {"PYTHONPATH": "${workspaceFolder}${pathSeparator}${env:PYTHONPATH}"}}
+        ],
+        "compounds": []
+    },
+}
