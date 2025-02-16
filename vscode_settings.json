@@ -45,9 +45,6 @@
         "editor.formatOnSave": true
     },
     "diffEditor.ignoreTrimWhitespace": false,
-
-    // Python
-    "python.languageServer": "Pylance",
     "python.analysis.typeCheckingMode": "standard",
     "python.analysis.diagnosticMode": "workspace",
     "notebook.diff.ignoreMetadata": true,
@@ -122,14 +119,12 @@
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "notebook.defaultFormatter": "ms-python.black-formatter",
-    "workbench.settings.applyToAllProfiles": [
-
-    ],
     "launch": {
-
         "configurations": [
             {"env": {"PYTHONPATH": "${workspaceFolder}${pathSeparator}${env:PYTHONPATH}"}}
         ],
         "compounds": []
     },
+    "notebook.formatOnSave.enabled": true,
+    "notebook.formatOnCellExecution": true,
 }
