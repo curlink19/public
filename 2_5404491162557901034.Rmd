@@ -1,0 +1,296 @@
+---
+title: "NCA seminar"
+author: "Panova Mila"
+date: "2025-03-19"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+```{r library, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(cowplot)
+library(scales)
+library(PKNCA)
+
+```
+
+
+```{r work1}
+theme_set(theme_bw())
+theme_update(panel.grid.minor = element_blank())
+MSDcol <- c("#1a1866", "#f2b93b", "#b73b58", "#a2d620", "#5839bb", "#9c4ec7", "#3a6eba", "#efdd3c", "#69686d")
+
+funSum <- list(N = ~n(),
+               mean   = ~mean(., na.rm = T),
+               median = ~median(., na.rm = T),
+               min    = ~min(., na.rm = T),
+               max    = ~max(., na.rm = T),
+               sd     = ~sd(., na.rm = T),
+               se     = ~sd(., na.rm = T)/sqrt(n()))
+data_X_iv <- read.csv("GlobalRepository/Workdir/NCA/Drug_X_iv.csv")
+data_X_po <- read.csv("GlobalRepository/Workdir/NCA/Drug_X_po.csv")
+data_Y_iv <- read.csv("GlobalRepository/Workdir/NCA/Drug_Y_iv.csv")
+Bioeq_data <- read.csv("GlobalRepository/Workdir/NCA/BioEq_data.csv")
+
+head(data_X_iv)
+head(data_X_po)
+head(data_Y_iv)
+```
+
+```{r work2}
+ggplot(data_X_iv, aes(x = TIME, y = DV, color = factor(ID))) +
+  geom_line(size = 0.2) +       
+  geom_point(size = 0.4) +      
+  labs(
+    title = "Pharmacokinetic Time Profiles",
+    x = "Time",
+    y = "DV"  
+  ) +
+  theme_cowplot()  
+
+```
+
+```{r work3}
+ggplot(data_Y_iv, aes(x = TIME, y = DV, color = factor(ID))) +
+  geom_line(size = 0.1) +       
+  geom_point(size = 0.3) +       
+  labs(
+    title = "Pharmacokinetic Time Profiles",
+    x = "Time",
+    y = "DV"  
+  ) +
+  theme_cowplot()  
+
+```
+
+```{r work4}
+ggplot(data_X_po, aes(x = TIME, y = DV, color = factor(ID))) +
+  geom_line(size = 0.2) +       
+  geom_point(size = 0.5) +       
+  labs(
+    title = "Pharmacokinetic Time Profiles",
+    x = "Time",
+    y = "DV"  
+  ) +
+  theme_cowplot()  
+
+```
+По получившимся графикам можем сделать выводы:
+
+1) в датасете "data_X_iv" внутривенный способ введения препарата, т.к. максимальная концентрация/эффект начинается сразу.
+
+2) в датасете "data_Y_iv" внутривенный способ введения препарата, т.к. максимальная концентрация/эффект начинается сразу.
+
+3) В датасете "data_X_po" пероральный способ введения лекарственного стредства, т.к. при таком способе введения для достижения максимального эффекта от лекарства необходимо время.
+
+Сразу сравнить эффективность препаратов не можем, так как у нас не обозначены единицы измерения TIME и DV.    
+Если сравнивать эффективность препарата X в двух способах принятия, во внутревенном максимальное DV больше.
+
+
+#####--------------- Task 2: Compute NCA parameters for IV and PO drug X ---------------#####
+
+
+
+### Calculate PK parameters: AUClast, AUCinf, AUMClast, AUMCinf, CL, lambda_z, half_life, MRT for each subject usinf PKNCA package (fill the gaps ... in PKNCA functions)
+
+```{r work5}
+
+duplicated_rows <- duplicated(data_X_iv$TIME)
+data_X_iv <- data_X_iv[-which(duplicated_rows),]
+
+conc_obj_x_iv <- PKNCAconc(data = data_X_iv, 
+                           formula =  DV ~ TIME)
+
+dose_obj_x_iv <- PKNCAdose(data = data_X_iv %>% filter(TIME == 0), 
+                           formula = DV ~ TIME, 
+                           route = "intravascular")
+
+data_obj_x_iv <- PKNCAdata(data.conc=conc_obj_x_iv,
+                           data.dose = dose_obj_x_iv,
+                           impute = "start_conc0",
+                           intervals=data.frame(start= 0.1,
+                                                end= 20,
+                                                auclast=TRUE,
+                                                aucinf.obs=TRUE, 
+                                                aumclast = TRUE,
+                                                aumcinf.obs=TRUE,
+                                                mrt.last = TRUE))
+
+
+results_obj_x_iv <- pk.nca(data_obj_x_iv)
+NCA_X_iv_res <- as.data.frame(results_obj_x_iv) %>% spread(PPTESTCD, PPORRES)
+
+summary(results_obj_x_iv)
+
+```
+
+```{r work6}
+
+duplicated_rows <- duplicated(data_Y_iv$TIME)
+data_Y_iv <- data_Y_iv[-which(duplicated_rows),]
+
+conc_obj_y_iv <- PKNCAconc(data = data_Y_iv, 
+                           formula =  DV ~ TIME)
+
+dose_obj_y_iv <- PKNCAdose(data = data_Y_iv %>% filter(TIME == 0), 
+                           formula = DV ~ TIME, 
+                           route = "intravascular")
+
+data_obj_y_iv <- PKNCAdata(data.conc=conc_obj_y_iv,
+                           data.dose = dose_obj_y_iv,
+                           impute = "start_conc0",
+                           intervals=data.frame(start= 0.1,
+                                                end= 800,
+                                                auclast=TRUE,
+                                                aucinf.obs=TRUE, 
+                                                aumclast = TRUE,
+                                                aumcinf.obs=TRUE,
+                                                mrt.last = TRUE))
+
+
+results_obj_y_iv <- pk.nca(data_obj_y_iv)
+NCA_Y_iv_res <- as.data.frame(results_obj_y_iv) %>% spread(PPTESTCD, PPORRES)
+
+summary(results_obj_y_iv)
+
+```
+
+
+```{r work7}
+
+subject_data <- subset(data_X_iv, ID == 1)
+
+init_dose <- 100
+study_duration <- 20
+
+measured_times <- unique(subject_data$TIME)
+n_measurements <- length(measured_times)
+concentrations <- rep(init_dose, n_measurements)
+
+AUC <- numeric(n_measurements)
+prev_AUC <- 0
+
+for (i in seq_along(measured_times)) {
+  if (i == 1) {
+    prev_AUC <- concentrations[i] * measured_times[i]
+  } else {
+    AUC[i] <- concentrations[i] * measured_times[i] + (prev_AUC + concentrations[i]) * (measured_times[i] - measured_times[i - 1]) / 2
+    prev_AUC <- AUC[i]
+  }
+}
+
+CL <- init_dose / AUC[n_measurements] / study_duration
+lambda_z <- log(2) / study_duration
+half_life <- log(2) / lambda_z
+AUMC <- numeric(n_measurements)
+
+prev_AUMC <- 0
+
+for (i in seq_along(measured_times)) {
+  if (i == 1) {
+    prev_AUMC <- concentrations[i] * measured_times[i]^2
+  } else {
+    AUMC[i] <- concentrations[i] * measured_times[i]^2 + (prev_AUMC + concentrations[i]) * (measured_times[i] - measured_times[i - 1]) * (measured_times[i] + measured_times[i - 1]) / 2
+    prev_AUMC <- AUMC[i]
+  }
+}
+
+MRT <- AUMC[n_measurements] / AUC[n_measurements]
+
+# Расчет общего объема распределения (Vss)
+Vss <- init_dose / (lambda_z * AUC[n_measurements])
+
+AUClast <- sum(concentrations * diff(measured_times))
+AUCinf <- AUClast + concentrations[n_measurements] * diff(tail(measured_times, 2)) / 2
+
+
+# Вывод результатов
+cat("AUClast: ", AUClast, "\n")
+cat("AUCinf: ", AUCinf, "\n")
+cat("CL: ", CL, "\n")
+cat("lambda_z: ", lambda_z, "\n")
+cat("half_life: ", half_life, "\n")
+cat("MRT: ", MRT, "\n")
+cat("Vss: ", Vss, "\n")
+
+```
+
+#####--------------- Task 4: Check bioequivalence of 2 theophylline drugs ---------------#####
+
+
+```{r work8}
+
+## Transform the dataset to obtain AUC for each drug (T and R)
+
+Bioeq_data_mod <- Bioeq_data %>% 
+  mutate(Per1_DR = substr(Seq,1,1),
+         Per2_DR = substr(Seq,2,2)) %>% 
+  gather("Period", "AUC0inf", -c("ID", "Seq", "Per1_DR", "Per2_DR")) %>% 
+  mutate(TRT = ifelse(Period == "Per1", Per1_DR, Per2_DR)) %>% 
+  select(-c("Per1_DR", "Per2_DR"))
+
+# Check distribution of AUCs in the population
+
+ggplot(data = Bioeq_data_mod, 
+       aes(x = AUC0inf))+
+  geom_histogram(binwidth = 10)
+
+ggplot(data = Bioeq_data_mod %>% filter(TRT == "T"), 
+       aes(x = AUC0inf))+
+  geom_histogram(binwidth = 10)
+
+ggplot(data = Bioeq_data_mod %>% filter(TRT == "R"), 
+       aes(x = AUC0inf))+
+  geom_histogram(binwidth = 10)
+
+
+# Compute geometric means ratios and corresponding CI
+
+Bioeq_data_aggr <- Bioeq_data_mod %>% 
+  group_by(TRT) %>% 
+  summarise(n = n(),
+            mean = mean(AUC0inf),
+            sd = sd(AUC0inf),
+            cv = sd/mean*100,
+            Gmean = mean(log(AUC0inf)),
+            Gsd = exp(sd(log(AUC0inf))),
+            CV = sqrt(exp(sd(log(AUC0inf))^2)-1)*100)
+
+Gmean_ratio <- Bioeq_data_aggr$Gmean[Bioeq_data_aggr$TRT == "T"] /
+  Bioeq_data_aggr$Gmean[Bioeq_data_aggr$TRT == "R"] 
+
+anova_model <- aov(data = Bioeq_data_mod,
+                   formula = log(AUC0inf) ~ Period + Seq + TRT + ID, 
+                   intercept = T)
+
+anova_model_sum <- as.data.frame(summary(anova_model)[[1]])
+
+# Make a conclusion about bioequivalence of 2 drugs
+
+CI_table <- function(anova_data = Bioeq_data_mod, anova_all = anova_model_sum, alpha = 0.1) {
+  MSE <- as.numeric(anova_all["Residuals", "Mean Sq"])
+  
+  n <- table(anova_data$Seq[anova_data$Period == "Per1"])
+  
+  trt_mean <- tapply(anova_data$AUC0inf, anova_data$TRT, function(x) mean(log(as.numeric(x))))
+  
+  CI <- round(exp(trt_mean["T"] - trt_mean["R"] + c(-1, 1) *  qt(1 - alpha/2, n[1] + n[2] - 2) * sqrt(MSE/2 * (1/n[1] + 1/n[2]))) * 100, 2)
+  CV <- round(sqrt(exp(MSE) - 1) * 100, 2)
+  gmean <- unname(round(exp(trt_mean["T"])/exp(trt_mean["R"]), 3))
+  
+  c(gmean = gmean, lower = paste0(CI[1], "%"), upper = paste0(CI[2], "%"), borders = "80% - 125%", CV = paste0(CV, "%"))
+}
+
+CI_res <- CI_table()
+
+```
+
+
